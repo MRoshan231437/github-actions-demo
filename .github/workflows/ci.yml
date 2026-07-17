@@ -1,36 +1,28 @@
-name: CI Demo
+name: Update HTML
 
 on:
   push:
     branches:
-      - main
-
-  pull_request:
-    branches:
-      - main
+      - feature/**
 
 jobs:
-  validate:
+  update-html:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v5
+      - uses: actions/checkout@v5
 
-      - name: Print Event
-        run: echo "Triggered by ${{ github.event_name }}"
-
-      - name: List Files
-        run: ls -la
-
-      - name: Validate index.html
+      - name: Modify HTML
         run: |
-          if [ -f index.html ]; then
-            echo "✅ index.html exists"
-          else
-            echo "❌ index.html missing"
-            exit 1
-          fi
+          echo "<h1>Updated by GitHub Actions</h1>" > index.html
 
-      - name: Display File
-        run: cat index.html
+      - name: Commit changes
+        run: |
+          git config --global user.name "github-actions"
+          git config --global user.email "github-actions@github.com"
+
+          git add index.html
+          git commit -m "Updated HTML from workflow" || echo "No changes"
+
+      - name: Push changes
+        run: git push
