@@ -1,76 +1,38 @@
-name: Push and Pull Request Demo
+name: Pull Request CI
 
 on:
-  push:
-    branches:
-      - 'feature/**'
-
   pull_request:
     branches:
       - main
 
-permissions:
-  contents: write
-
 jobs:
-  github-actions-demo:
+  validate:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v5
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Show Trigger Event
+      - name: Show Event
         run: echo "Triggered by ${{ github.event_name }}"
+
+      - name: Show Branch
+        run: echo "Source Branch: ${{ github.head_ref }}"
 
       - name: List Files
         run: ls -la
 
-      - name: Modify HTML (Only on Push)
-        if: github.event_name == 'push'
+      - name: Validate HTML
         run: |
-          cat <<EOF > index.html
-          <!DOCTYPE html>
-          <html>
-          <head>
-              <title>GitHub Actions Demo</title>
-          </head>
-          <body>
-              <h1>Updated by GitHub Actions 🚀</h1>
-              <p>Triggered on PUSH</p>
-          </body>
-          </html>
-          EOF
-
-      - name: Configure Git (Only on Push)
-        if: github.event_name == 'push'
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-
-      - name: Commit Changes (Only on Push)
-        if: github.event_name == 'push'
-        run: |
-          git add index.html
-
-          if git diff --cached --quiet; then
-            echo "No changes to commit."
+          if [ -f index.html ]; then
+            echo "✅ index.html exists"
           else
-            git commit -m "Updated HTML via GitHub Actions"
+            echo "❌ index.html not found"
+            exit 1
           fi
-
-      - name: Push Changes (Only on Push)
-        if: github.event_name == 'push'
-        run: |
-          git push origin HEAD:${{ github.ref_name }}
 
       - name: Display HTML
         run: cat index.html
 
-      - name: Pull Request Validation
-        if: github.event_name == 'pull_request'
-        run: |
-          echo "✅ Pull Request validation successful."
-          echo "Ready for review and merge."
+      - name: CI Passed
+        run: echo "✅ Pull Request validation completed successfully."
