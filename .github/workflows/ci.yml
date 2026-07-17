@@ -1,0 +1,38 @@
+name: Push Demo
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  validate-push:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v5
+
+      - name: Show Current Directory
+        run: pwd
+
+      - name: List Repository Files
+        run: ls -la
+
+      - name: Check if index.html exists
+        run: |
+          if [ -f index.html ]; then
+            echo "✅ index.html found"
+          else
+            echo "❌ index.html not found"
+            exit 1
+          fi
+
+      - name: Display index.html
+        run: cat index.html
+
+      - name: Print Trigger
+        run: echo "Triggered by ${{ github.event_name }}"
+
+      - name: Workflow Completed
+        run: echo "🎉 Push workflow completed successfully!"
