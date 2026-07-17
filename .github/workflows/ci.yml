@@ -1,38 +1,36 @@
-name: Push Demo
+name: CI Demo
 
 on:
   push:
     branches:
       - main
 
+  pull_request:
+    branches:
+      - main
+
 jobs:
-  validate-push:
+  validate:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v5
 
-      - name: Show Current Directory
-        run: pwd
+      - name: Print Event
+        run: echo "Triggered by ${{ github.event_name }}"
 
-      - name: List Repository Files
+      - name: List Files
         run: ls -la
 
-      - name: Check if index.html exists
+      - name: Validate index.html
         run: |
           if [ -f index.html ]; then
-            echo "✅ index.html found"
+            echo "✅ index.html exists"
           else
-            echo "❌ index.html not found"
+            echo "❌ index.html missing"
             exit 1
           fi
 
-      - name: Display index.html
+      - name: Display File
         run: cat index.html
-
-      - name: Print Trigger
-        run: echo "Triggered by ${{ github.event_name }}"
-
-      - name: Workflow Completed
-        run: echo "🎉 Push workflow completed successfully!"
