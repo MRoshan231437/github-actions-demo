@@ -1,15 +1,19 @@
-name: Update HTML with GitHub Actions
+name: Push and Pull Request Demo
 
 on:
   push:
     branches:
       - 'feature/**'
 
+  pull_request:
+    branches:
+      - main
+
 permissions:
   contents: write
 
 jobs:
-  update-html:
+  github-actions-demo:
     runs-on: ubuntu-latest
 
     steps:
@@ -18,7 +22,14 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Modify HTML
+      - name: Show Trigger Event
+        run: echo "Triggered by ${{ github.event_name }}"
+
+      - name: List Files
+        run: ls -la
+
+      - name: Modify HTML (Only on Push)
+        if: github.event_name == 'push'
         run: |
           cat <<EOF > index.html
           <!DOCTYPE html>
@@ -28,26 +39,38 @@ jobs:
           </head>
           <body>
               <h1>Updated by GitHub Actions 🚀</h1>
-              <p>This file was modified automatically.</p>
+              <p>Triggered on PUSH</p>
           </body>
           </html>
           EOF
 
-      - name: Configure Git
+      - name: Configure Git (Only on Push)
+        if: github.event_name == 'push'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-      - name: Commit Changes
+      - name: Commit Changes (Only on Push)
+        if: github.event_name == 'push'
         run: |
           git add index.html
 
           if git diff --cached --quiet; then
             echo "No changes to commit."
           else
-            git commit -m "Updated index.html via GitHub Actions"
+            git commit -m "Updated HTML via GitHub Actions"
           fi
 
-      - name: Push Changes
+      - name: Push Changes (Only on Push)
+        if: github.event_name == 'push'
         run: |
           git push origin HEAD:${{ github.ref_name }}
+
+      - name: Display HTML
+        run: cat index.html
+
+      - name: Pull Request Validation
+        if: github.event_name == 'pull_request'
+        run: |
+          echo "✅ Pull Request validation successful."
+          echo "Ready for review and merge."
